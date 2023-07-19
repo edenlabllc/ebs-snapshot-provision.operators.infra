@@ -1,0 +1,31 @@
+# permissions for end users to edit ebssnapshotprovisions.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: ebssnapshotprovision-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: ebs-snapshot-provision
+    app.kubernetes.io/part-of: ebs-snapshot-provision
+    app.kubernetes.io/managed-by: kustomize
+  name: ebssnapshotprovision-editor-role
+rules:
+- apiGroups:
+  - ebs.aws.edenlab.io
+  resources:
+  - ebssnapshotprovisions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ebs.aws.edenlab.io
+  resources:
+  - ebssnapshotprovisions/status
+  verbs:
+  - get

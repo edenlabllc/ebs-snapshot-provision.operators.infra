@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- ebs_v1alpha1_ebssnapshotprovision.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples

@@ -1,0 +1,27 @@
+# permissions for end users to view ebssnapshotprovisions.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: ebssnapshotprovision-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: ebs-snapshot-provision
+    app.kubernetes.io/part-of: ebs-snapshot-provision
+    app.kubernetes.io/managed-by: kustomize
+  name: ebssnapshotprovision-viewer-role
+rules:
+- apiGroups:
+  - ebs.aws.edenlab.io
+  resources:
+  - ebssnapshotprovisions
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ebs.aws.edenlab.io
+  resources:
+  - ebssnapshotprovisions/status
+  verbs:
+  - get
