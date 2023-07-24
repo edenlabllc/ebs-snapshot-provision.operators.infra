@@ -22,6 +22,9 @@ spec:
     - jsonPath: .status.createdTime
       name: CREATED-TIME
       type: string
+    - jsonPath: .status.count
+      name: COUNT
+      type: integer
     name: v1alpha1
     schema:
       openAPIV3Schema:
@@ -61,6 +64,8 @@ spec:
             description: EBSSnapshotProvisionStatus defines the observed state of
               EBSSnapshotProvision
             properties:
+              count:
+                type: integer
               createdTime:
                 format: date-time
                 type: string

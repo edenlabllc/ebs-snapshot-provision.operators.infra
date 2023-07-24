@@ -48,6 +48,7 @@ type EBSSnapshotProvisionReconciler struct {
 func (r *EBSSnapshotProvisionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := log.FromContext(ctx)
 	ebsSnapshotProvision := &ebsv1alpha1.EBSSnapshotProvision{}
+	count := 0
 
 	if err := r.Client.Get(ctx, req.NamespacedName, ebsSnapshotProvision); err != nil {
 		if errors.IsNotFound(err) {
@@ -103,6 +104,8 @@ func (r *EBSSnapshotProvisionReconciler) Reconcile(ctx context.Context, req ctrl
 
 					return ctrl.Result{}, err
 				}
+
+				count++
 			} else {
 				return ctrl.Result{}, err
 			}
@@ -110,8 +113,11 @@ func (r *EBSSnapshotProvisionReconciler) Reconcile(ctx context.Context, req ctrl
 	}
 
 	// ebsSnapshotProvision.Status.Conditions.
-	ebsSnapshotProvision.Status.Phase = "Provisioned VolumeSnapshot"
-	ebsSnapshotProvision.Status.CreatedTime = &metav1.Time{Time: time.Now()}
+	ebsSnapshotProvision.Status.Phase = "Provisioned VolumeSnapshots"
+	if count > 0 {
+		ebsSnapshotProvision.Status.CreatedTime = &metav1.Time{Time: time.Now()}
+		ebsSnapshotProvision.Status.Count = count
+	}
 	ebsSnapshotProvision.Status.Error = ""
 	if err := r.Status().Update(ctx, ebsSnapshotProvision); err != nil {
 		reqLogger.Error(err, fmt.Sprintf("Unable to update status for CRD: %s", req.Name))

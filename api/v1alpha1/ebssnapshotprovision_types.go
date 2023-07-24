@@ -27,15 +27,17 @@ type EBSSnapshotProvisionStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Error       string       `json:"error,omitempty"`
 	CreatedTime *metav1.Time `json:"createdTime,omitempty"`
+	Error       string       `json:"error,omitempty"`
 	Phase       string       `json:"phase,omitempty"`
+	Count       int          `json:"count,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+kubebuilder:printcolumn:name="PHASE",type=string,JSONPath=`.status.phase`
 //+kubebuilder:printcolumn:name="CREATED-TIME",type=string,JSONPath=".status.createdTime"
+//+kubebuilder:printcolumn:name="COUNT",type=integer,JSONPath=".status.count"
 
 // EBSSnapshotProvision is the Schema for the ebssnapshotprovisions API
 type EBSSnapshotProvision struct {
