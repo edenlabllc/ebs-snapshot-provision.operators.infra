@@ -1,8 +1,35 @@
 # ebs-snapshot-provision
-// TODO(user): Add simple overview of use/purpose
+The `ebs snapshot provision` operator provision automatically the exists Amazon EBS snapshots in current K8S cluster.
 
 ## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+For dynamic creation and provision of AWC EBS snapshots to the cluster, the following is used: `aws-ebs-csi-driver` and `external snapshotter`[aws-ebs-csi-driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver/tree/master/examples/kubernetes/snapshot). 
+This approach is good when we want to create snapshots from existing PVC within the same cluster. 
+But if we want to provide previously created AWS snapshots, for example, in a new cluster for their further restoration, 
+then the `aws-ebs-csi-driver` and `external snapshotter` do not support such an automated process for a number of reasons.
+The ebs-snapshot-provision operator makes this possible via CR:
+```yaml
+spec:
+  # required fields
+  clusterName: kodjin-develop # tenant name
+  region: eu-north-1 # aws region
+  frequency: 1m # AWS api request frequency to poll the list of snapshots
+  volumeSnapshotClassName: ebs-csi-snapshot-class # current csi snapshot class name
+```
+## Requirements
+* VolumeSnapshotClass parameters:
+  ```yaml
+  snapshotClasses:
+  - name: {{ .Release.Name }}
+    # . . .
+    parameters:
+      tagSpecification_1: "{{`snapshotNamespace={{ .VolumeSnapshotNamespace }}`}}"
+      tagSpecification_2: "{{`snapshotName={{ .VolumeSnapshotName }}`}}"
+      tagSpecification_3: "{{`snapshotContentName={{ .VolumeSnapshotContentName }}`}}"
+  ```
+  should contain additional parameters with placeholders for AWS snapshot tags.
+* The following releases are enabled in `release.yaml`:
+  * ebs-csi-snapshot-controller
+  * ebs-csi-controller
 
 ## Getting Started
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
@@ -12,19 +39,19 @@ You’ll need a Kubernetes cluster to run against. You can use [KIND](https://si
 1. Install Instances of Custom Resources:
 
 ```sh
-kubectl apply -f config/samples/
+kubectl apply -f config/samples/ebs_v1alpha1_ebssnapshotprovision.yaml
 ```
 
 2. Build and push your image to the location specified by `IMG`:
 
 ```sh
-make docker-build docker-push IMG=<some-registry>/ebs-snapshot-provision:tag
+make docker-build docker-push IMG=<some-registry>/core.ebs-snapshot-provision.operators.infra:tag
 ```
 
 3. Deploy the controller to the cluster with the image specified by `IMG`:
 
 ```sh
-make deploy IMG=<some-registry>/ebs-snapshot-provision:tag
+make deploy IMG=<some-registry>/core.ebs-snapshot-provision.operators.infra:tag
 ```
 
 ### Uninstall CRDs
@@ -42,7 +69,6 @@ make undeploy
 ```
 
 ## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
 
 ### How it works
 This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/).
@@ -75,8 +101,3 @@ make manifests
 **NOTE:** Run `make --help` for more information on all potential `make` targets
 
 More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
-
-## License
-
-Copyright 2023 @apanasiuk-el edenlabllc.
-

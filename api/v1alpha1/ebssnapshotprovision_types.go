@@ -16,18 +16,26 @@ type EBSSnapshotProvisionSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of EBSSnapshotProvision. Edit ebssnapshotprovision_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	ClusterName             string           `json:"clusterName"`
+	Region                  string           `json:"region"`
+	VolumeSnapshotClassName string           `json:"volumeSnapshotClassName"`
+	Frequency               *metav1.Duration `json:"frequency"`
 }
 
 // EBSSnapshotProvisionStatus defines the observed state of EBSSnapshotProvision
 type EBSSnapshotProvisionStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	Error       string       `json:"error,omitempty"`
+	CreatedTime *metav1.Time `json:"createdTime,omitempty"`
+	Phase       string       `json:"phase,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="PHASE",type=string,JSONPath=`.status.phase`
+//+kubebuilder:printcolumn:name="CREATED-TIME",type=string,JSONPath=".status.createdTime"
 
 // EBSSnapshotProvision is the Schema for the ebssnapshotprovisions API
 type EBSSnapshotProvision struct {

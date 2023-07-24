@@ -9,4 +9,7 @@ metadata:
     app.kubernetes.io/created-by: ebs-snapshot-provision
   name: ebssnapshotprovision-sample
 spec:
-  # TODO(user): Add fields here
+  clusterName: deps-ffs-296
+  region: eu-north-1
+  frequency: 30s
+  volumeSnapshotClassName: ebs-csi-snapshot-class

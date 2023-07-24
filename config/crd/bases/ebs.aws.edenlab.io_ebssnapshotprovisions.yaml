@@ -15,7 +15,14 @@ spec:
     singular: ebssnapshotprovision
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .status.phase
+      name: PHASE
+      type: string
+    - jsonPath: .status.createdTime
+      name: CREATED-TIME
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: EBSSnapshotProvision is the Schema for the ebssnapshotprovisions
@@ -36,14 +43,31 @@ spec:
           spec:
             description: EBSSnapshotProvisionSpec defines the desired state of EBSSnapshotProvision
             properties:
-              foo:
-                description: Foo is an example field of EBSSnapshotProvision. Edit
-                  ebssnapshotprovision_types.go to remove/update
+              clusterName:
                 type: string
+              frequency:
+                type: string
+              region:
+                type: string
+              volumeSnapshotClassName:
+                type: string
+            required:
+            - clusterName
+            - frequency
+            - region
+            - volumeSnapshotClassName
             type: object
           status:
             description: EBSSnapshotProvisionStatus defines the observed state of
               EBSSnapshotProvision
+            properties:
+              createdTime:
+                format: date-time
+                type: string
+              error:
+                type: string
+              phase:
+                type: string
             type: object
         type: object
     served: true
