@@ -1,0 +1,15 @@
+apiVersion: ebs.aws.edenlab.io/v1alpha1
+kind: EBSSnapshotProvision
+metadata:
+  labels:
+    app.kubernetes.io/name: ebssnapshotprovision
+    app.kubernetes.io/instance: ebssnapshotprovision-sample
+    app.kubernetes.io/part-of: ebs-snapshot-provision
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: ebs-snapshot-provision
+  name: ebssnapshotprovision-sample
+spec:
+  clusterName: deps-ffs-296
+  region: eu-north-1
+  frequency: 30s
+  volumeSnapshotClassName: ebs-csi-snapshot-class
