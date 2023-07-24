@@ -1,8 +1,8 @@
 # ebs-snapshot-provision
-The `ebs snapshot provision` operator provision automatically the exists Amazon EBS snapshots in current K8S cluster.
+The `ebs snapshot provision` operator automatically provisions existing Amazon EBS snapshots in current K8S cluster.
 
 ## Description
-For dynamic creation and provision of AWC EBS snapshots to the cluster, the following is used: `aws-ebs-csi-driver` and `external snapshotter`[aws-ebs-csi-driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver/tree/master/examples/kubernetes/snapshot). 
+For dynamic creation and provisioning of AWC EBS snapshots to the cluster, the following is used: `aws-ebs-csi-driver` and `external snapshotter`[aws-ebs-csi-driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver/tree/master/examples/kubernetes/snapshot). 
 This approach is good when we want to create snapshots from existing PVC within the same cluster. 
 But if we want to provide previously created AWS snapshots, for example, in a new cluster for their further restoration, 
 then the `aws-ebs-csi-driver` and `external snapshotter` do not support such an automated process for a number of reasons.
@@ -11,9 +11,9 @@ The ebs-snapshot-provision operator makes this possible via CR:
 spec:
   # required fields
   clusterName: kodjin-develop # tenant name
-  region: eu-north-1 # aws region
-  frequency: 1m # AWS api request frequency to poll the list of snapshots
-  volumeSnapshotClassName: ebs-csi-snapshot-class # current csi snapshot class name
+  region: eu-north-1 # AWS region
+  frequency: 1m # AWS API request frequency to poll the list of snapshots
+  volumeSnapshotClassName: ebs-csi-snapshot-class # current CSI snapshot class name
 ```
 ## Requirements
 * VolumeSnapshotClass parameters:
