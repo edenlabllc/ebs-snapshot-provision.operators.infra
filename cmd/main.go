@@ -104,7 +104,7 @@ func main() {
 		Scheme:          mgr.GetScheme(),
 		SnapshotCreator: snapshot.NewDefaultSnapshotCreator(aws.NewDefaultSnapshotRetriever()),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "ECRTokenRefresh")
+		setupLog.Error(err, "unable to create controller", "controller", "EBSSnapshotProvision")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder
