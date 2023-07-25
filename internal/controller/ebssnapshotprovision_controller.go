@@ -64,7 +64,7 @@ func (r *EBSSnapshotProvisionReconciler) Reconcile(ctx context.Context, req ctrl
 	newVolumeSnapshots, newVolumeSnapshotContents, err := r.SnapshotCreator.CreateVolumeSnapshots(&snapshot.InputFromCRD{CRD: ebsSnapshotProvision})
 	if err != nil {
 		reqLogger.Error(err, fmt.Sprintf("Can not get AWS snapshots for cluster name: %s", ebsSnapshotProvision.Spec.ClusterName))
-		ebsSnapshotProvision.Status.Phase = "Error"
+		ebsSnapshotProvision.Status.Phase = "Failed"
 		ebsSnapshotProvision.Status.Error = err.Error()
 		if err := r.Status().Update(ctx, ebsSnapshotProvision); err != nil {
 			reqLogger.Error(err, fmt.Sprintf("Unable to update status for CRD: %s", req.Name))
@@ -83,7 +83,7 @@ func (r *EBSSnapshotProvisionReconciler) Reconcile(ctx context.Context, req ctrl
 			if errors.IsNotFound(err) {
 				reqLogger.Info(fmt.Sprintf("Creating new volume snapshot content: %s", vsContent.Name))
 				if result, err := r.createVSContent(ctx, vsContent, reqLogger); err != nil {
-					ebsSnapshotProvision.Status.Phase = "Error Provisioning Volume Snapshot Content"
+					ebsSnapshotProvision.Status.Phase = "Failed"
 					ebsSnapshotProvision.Status.Error = err.Error()
 					if err := r.Status().Update(ctx, ebsSnapshotProvision); err != nil {
 						reqLogger.Error(err, fmt.Sprintf("Unable to update status for CRD: %s", req.Name))
@@ -95,7 +95,7 @@ func (r *EBSSnapshotProvisionReconciler) Reconcile(ctx context.Context, req ctrl
 
 				reqLogger.Info(fmt.Sprintf("Creating new volume snapshot: %s for namespace: %s", snap.Name, snap.Namespace))
 				if err = r.Client.Create(ctx, snap.DeepCopy()); err != nil {
-					ebsSnapshotProvision.Status.Phase = "Error Provisioning Volume Snapshot"
+					ebsSnapshotProvision.Status.Phase = "Failed"
 					ebsSnapshotProvision.Status.Error = err.Error()
 					if err := r.Status().Update(ctx, ebsSnapshotProvision); err != nil {
 						reqLogger.Error(err, fmt.Sprintf("Unable to update status for CRD: %s", req.Name))
@@ -113,7 +113,7 @@ func (r *EBSSnapshotProvisionReconciler) Reconcile(ctx context.Context, req ctrl
 	}
 
 	// ebsSnapshotProvision.Status.Conditions.
-	ebsSnapshotProvision.Status.Phase = "Provisioned VolumeSnapshots"
+	ebsSnapshotProvision.Status.Phase = "Provisioned"
 	if count > 0 {
 		ebsSnapshotProvision.Status.CreatedTime = &metav1.Time{Time: time.Now()}
 		ebsSnapshotProvision.Status.Count = count
