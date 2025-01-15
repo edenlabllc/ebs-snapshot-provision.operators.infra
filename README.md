@@ -4,33 +4,35 @@
 [![Software License](https://img.shields.io/github/license/edenlabllc/ebs-snapshot-provision.operators.infra.svg?style=for-the-badge)](LICENSE)
 [![Powered By: Edenlab](https://img.shields.io/badge/powered%20by-edenlab-8A2BE2.svg?style=for-the-badge)](https://edenlab.io)
 
-The EBS snapshot provision operator automatically provisions existing Amazon EBS snapshots in current K8S cluster.
+The EBS snapshot provision operator automatically provisions existing Amazon EBS snapshots in a K8S cluster.
 
 ## Description
 
-For dynamic creation and provisioning of AWC EBS snapshots to the cluster, the following is used: `aws-ebs-csi-driver`
-and `external snapshotter`[aws-ebs-csi-driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver/tree/master/examples/kubernetes/snapshot).
-This approach is good when we want to create snapshots from existing PVC within the same cluster.
-But if we want to provide previously created AWS snapshots, for example, in a new cluster for their further restoration,
-then the `aws-ebs-csi-driver` and `external snapshotter` do not support such an automated process for a number of
+For dynamic creation and provisioning of AWC EBS snapshots for a K8S cluster, the following components can be
+used: [aws-ebs-csi-driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver/tree/master/examples/kubernetes/snapshot).
+and [external snapshotter](https://github.com/kubernetes-csi/external-snapshotter)
+This approach is good when we want to create snapshots from an existing PVC within the same cluster.
+However, if we want to use previously created AWS snapshots, for example, in a new cluster for their further
+restoration,
+then the `aws-ebs-csi-driver` and `external-snapshotter` do not support such an automated process for a number of
 reasons.
-The ebs-snapshot-provision operator makes this possible via CR:
+The EBS snapshot provision operator makes this possible via the CR:
 
 ```yaml
 spec:
   # required fields
-  clusterName: kodjin-develop # tenant name
-  region: eu-north-1 # AWS region
+  clusterName: deps-develop # tenant name
+  region: us-east-1 # AWS region
   frequency: 1m # AWS API request frequency to poll the list of snapshots
   volumeSnapshotClassName: ebs-csi-snapshot-class # current CSI snapshot class name
 ```
 
 ## Requirements
 
-* VolumeSnapshotClass parameters:
+* The `VolumeSnapshotClass` parameters are:
   ```yaml
   snapshotClasses:
-  - name: {{ .Release.Name }}
+  - name: ebs-csi-snapshot-class
     # . . .
     parameters:
       tagSpecification_1: "{{`snapshotNamespace={{ .VolumeSnapshotNamespace }}`}}"
@@ -38,9 +40,6 @@ spec:
       tagSpecification_3: "{{`snapshotContentName={{ .VolumeSnapshotContentName }}`}}"
   ```
   should contain additional parameters with placeholders for AWS snapshot tags.
-* The following releases are enabled in `release.yaml`:
-    * ebs-csi-snapshot-controller
-    * ebs-csi-controller
 
 ## Getting Started
 
