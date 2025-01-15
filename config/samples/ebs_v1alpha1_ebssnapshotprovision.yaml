@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/created-by: ebs-snapshot-provision
   name: ebssnapshotprovision-sample
 spec:
-  clusterName: deps-ffs-296
-  region: eu-north-1
+  clusterName: deps-develop
+  region: us-east-1
   frequency: 30s
   volumeSnapshotClassName: ebs-csi-snapshot-class
