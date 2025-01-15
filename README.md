@@ -4,15 +4,16 @@
 [![Software License](https://img.shields.io/github/license/edenlabllc/ebs-snapshot-provision.operators.infra.svg?style=for-the-badge)](LICENSE)
 [![Powered By: Edenlab](https://img.shields.io/badge/powered%20by-edenlab-8A2BE2.svg?style=for-the-badge)](https://edenlab.io)
 
-The EBS snapshot provision operator automatically provisions existing Amazon EBS snapshots in a K8S cluster.
+The EBS snapshot provision operator automatically provisions Amazon EBS snapshots to be used in an existing K8S cluster.
 
 ## Description
 
 For dynamic creation and provisioning of AWC EBS snapshots for a K8S cluster, the following components can be
 used: [aws-ebs-csi-driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver/tree/master/examples/kubernetes/snapshot).
 and [external snapshotter](https://github.com/kubernetes-csi/external-snapshotter)
-This approach is good when we want to create snapshots from an existing PVC within the same cluster.
-However, if we want to use previously created AWS snapshots, for example, in a new cluster for their further
+This approach is good when we want to create the snapshots manually from an existing PVC within the same cluster.
+However, if we want to automatically provision AWS EBS snapshots and then use in, for example, in a new K8S cluster for
+further
 restoration,
 then the `aws-ebs-csi-driver` and `external-snapshotter` do not support such an automated process for a number of
 reasons.
