@@ -10,6 +10,6 @@ metadata:
   name: ebssnapshotprovision-sample
 spec:
   clusterName: deps-develop
-  region: eu-north-1
-  frequency: 30s
+  region: us-east-1
+  frequency: 1m
   volumeSnapshotClassName: ebs-csi-snapshot-class
