@@ -39,7 +39,7 @@ func (r *DefaultSnapshotRetriever) GetSnapshots(clusterName, region string) ([]*
 	svc := ec2.New(s)
 	input := &ec2.DescribeSnapshotsInput{
 		Filters: []*ec2.Filter{
-			&ec2.Filter{
+			{
 				Name:   aws.String("tag:kubernetes.io/cluster/" + clusterName),
 				Values: []*string{aws.String("owned")},
 			},
