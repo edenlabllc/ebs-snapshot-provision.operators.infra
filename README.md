@@ -7,6 +7,8 @@
 The **EBS Snapshot Provision Operator** automates the provisioning of Amazon EBS snapshots into an existing Kubernetes
 cluster. This allows seamless restoration of volumes from snapshots that were originally created in other clusters.
 
+The operator is a small tool that carefully brings snapshots from **the past** and makes them part of **a new future**.
+
 ## Description
 
 For dynamic creation and provisioning of AWS EBS snapshots within the **same** Kubernetes cluster, the standard approach
@@ -66,14 +68,6 @@ snapshotClasses:
 ```
 
 This tagging scheme allows the operator to correctly match AWS snapshots to Kubernetes objects in the target cluster.
-
----
-
-## Summary
-
-The **EBS Snapshot Provision Operator** extends the functionality of standard Kubernetes CSI drivers by enabling
-**cross-cluster snapshot provisioning**. It is a small tool that carefully brings snapshots from **the past** and 
-makes them part of **a new future**.
 
 ## Getting Started
 
