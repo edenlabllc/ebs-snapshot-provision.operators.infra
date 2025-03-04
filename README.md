@@ -75,6 +75,9 @@ The **EBS Snapshot Provision Operator** extends the functionality of standard Ku
 **cross-cluster snapshot provisioning**. This is particularly useful for backup, disaster recovery, and migration
 scenarios where data needs to be seamlessly restored into a fresh Kubernetes cluster.
 
+The **EBS Snapshot Provision Operator** is a small tool that carefully brings snapshots from **the past** and makes them
+part of **a new future**.
+
 ## Getting Started
 
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for
