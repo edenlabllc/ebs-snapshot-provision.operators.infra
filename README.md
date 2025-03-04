@@ -72,11 +72,8 @@ This tagging scheme allows the operator to correctly match AWS snapshots to Kube
 ## Summary
 
 The **EBS Snapshot Provision Operator** extends the functionality of standard Kubernetes CSI drivers by enabling
-**cross-cluster snapshot provisioning**. This is particularly useful for backup, disaster recovery, and migration
-scenarios where data needs to be seamlessly restored into a fresh Kubernetes cluster.
-
-The **EBS Snapshot Provision Operator** is a small tool that carefully brings snapshots from **the past** and makes them
-part of **a new future**.
+**cross-cluster snapshot provisioning**. It is a small tool that carefully brings snapshots from **the past** and 
+makes them part of **a new future**.
 
 ## Getting Started
 
