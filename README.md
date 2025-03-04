@@ -4,43 +4,70 @@
 [![Software License](https://img.shields.io/github/license/edenlabllc/ebs-snapshot-provision.operators.infra.svg?style=for-the-badge)](LICENSE)
 [![Powered By: Edenlab](https://img.shields.io/badge/powered%20by-edenlab-8A2BE2.svg?style=for-the-badge)](https://edenlab.io)
 
-The EBS snapshot provision operator automatically provisions Amazon EBS snapshots to be used in an existing K8S cluster.
+The **EBS Snapshot Provision Operator** automates the provisioning of Amazon EBS snapshots into an existing Kubernetes
+cluster. This allows seamless restoration of volumes from snapshots that were originally created in other clusters.
+
+The operator is a small tool that carefully brings snapshots from **the past** and makes them part of **a new future**.
 
 ## Description
 
-For dynamic creation and provisioning of AWC EBS snapshots for a K8S cluster, the following components can be
-used: [aws-ebs-csi-driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver/tree/master/examples/kubernetes/snapshot).
-and [external snapshotter](https://github.com/kubernetes-csi/external-snapshotter)
-This approach is good when we want to create the snapshots manually from an existing PVC within the same cluster.
-However, if we want to automatically provision AWS EBS snapshots and then use in, for example, in a new K8S cluster for
-further
-restoration,
-then the `aws-ebs-csi-driver` and `external-snapshotter` do not support such an automated process for a number of
-reasons.
-The EBS snapshot provision operator makes this possible via the CR:
+For dynamic creation and provisioning of AWS EBS snapshots within the **same** Kubernetes cluster, the standard approach
+relies on the following components:
+
+- [aws-ebs-csi-driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver)
+- [external-snapshotter](https://github.com/kubernetes-csi/external-snapshotter)
+
+This standard approach works well when snapshots are created manually from a PersistentVolumeClaim (PVC) within the same
+cluster.
+
+### What problem does this operator solve?
+
+When you need to **automatically provision AWS EBS snapshots created in one cluster into a different cluster**
+(e.g., for backup restoration into a new environment), the `aws-ebs-csi-driver` and `external-snapshotter` do not
+support this process directly.
+
+The **EBS Snapshot Provision Operator** addresses this gap by watching for AWS EBS snapshots matching specific tags and
+automatically creating the corresponding `VolumeSnapshot` and `VolumeSnapshotContent` Kubernetes resources in the target
+cluster.
+
+## Key features
+
+- Automatically detects and provisions EBS snapshots created in other clusters.
+- Supports custom tagging for identifying snapshots.
+- Periodically polls the AWS API to discover new snapshots.
+- Automatically creates the required Kubernetes resources (`VolumeSnapshot` and `VolumeSnapshotContent`).
+
+## Custom Resource Specification
+
+The operator is configured via a Custom Resource (CR), which defines the snapshot import policy:
 
 ```yaml
 spec:
-  # required fields
-  clusterName: deps-develop # tenant name
-  region: us-east-1 # AWS region
-  frequency: 1m # AWS API request frequency to poll the list of snapshots
-  volumeSnapshotClassName: ebs-csi-snapshot-class # current CSI snapshot class name
+  # Required fields
+  clusterName: deps-develop                        # Tenant/Cluster name from which snapshots originate
+  region: us-east-1                                # AWS region where snapshots are stored
+  frequency: 1m                                    # Polling frequency for AWS API (e.g., 1 minute)
+  volumeSnapshotClassName: ebs-csi-snapshot-class  # Name of the VolumeSnapshotClass to use
 ```
 
 ## Requirements
 
-* The `VolumeSnapshotClass` parameters are:
-  ```yaml
-  snapshotClasses:
+### VolumeSnapshotClass configuration
+
+The target cluster must define a `VolumeSnapshotClass` with parameters that enable tagging of snapshots.  
+The following example shows the required placeholders that allow the operator to map AWS snapshot tags to the
+corresponding `VolumeSnapshot` and `VolumeSnapshotContent` resources:
+
+```yaml
+snapshotClasses:
   - name: ebs-csi-snapshot-class
-    # . . .
     parameters:
       tagSpecification_1: "{{`snapshotNamespace={{ .VolumeSnapshotNamespace }}`}}"
       tagSpecification_2: "{{`snapshotName={{ .VolumeSnapshotName }}`}}"
       tagSpecification_3: "{{`snapshotContentName={{ .VolumeSnapshotContentName }}`}}"
-  ```
-  should contain additional parameters with placeholders for AWS snapshot tags.
+```
+
+This tagging scheme allows the operator to correctly match AWS snapshots to Kubernetes objects in the target cluster.
 
 ## Getting Started
 
