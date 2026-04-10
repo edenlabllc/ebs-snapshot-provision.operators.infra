@@ -1,12 +1,20 @@
 package snapshot
 
 import (
-	ebsv1alpha1 "ebs-snapshot-provision.operators.infra/api/v1alpha1"
+	"fmt"
+	"regexp"
+	"time"
+
 	snapv1 "github.com/kubernetes-csi/external-snapshotter/client/v6/apis/volumesnapshot/v1"
 	core_v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	ebsv1alpha1 "ebs-snapshot-provision.operators.infra/api/v1alpha1"
 	"ebs-snapshot-provision.operators.infra/internal/aws"
+)
+
+const (
+	snapshotTimeLayout = "200601021504"
 )
 
 var (
@@ -21,6 +29,7 @@ var (
 	}
 
 	volumeSnapshotContentSourceVolumeMode = core_v1.PersistentVolumeFilesystem
+	snapshotTimeRe                        = regexp.MustCompile(`(\d{12})$`)
 )
 
 type InputFromCRD struct {
@@ -71,11 +80,20 @@ func (sg *DefaultSnapshotCreator) CreateVolumeSnapshots(input *InputFromCRD) ([]
 
 		}
 
+		labels := make(map[string]string)
+		snapshotTime, err := extractTimeFromName(name)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		labels["snapscheduler.backube/when"] = snapshotTime
+
 		volumeSnapshots = append(volumeSnapshots, snapv1.VolumeSnapshot{
 			TypeMeta: volumeSnapshotMeta,
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: namespace,
 				Name:      name,
+				Labels:    labels,
 			},
 			Spec: snapv1.VolumeSnapshotSpec{
 				VolumeSnapshotClassName: &input.CRD.Spec.VolumeSnapshotClassName,
@@ -111,4 +129,18 @@ func (sg *DefaultSnapshotCreator) CreateVolumeSnapshots(input *InputFromCRD) ([]
 	}
 
 	return volumeSnapshots, volumeSnapshotContents, nil
+}
+
+func extractTimeFromName(name string) (string, error) {
+	match := snapshotTimeRe.FindString(name)
+	if match == "" {
+		return "", fmt.Errorf("timestamp not found in snapshot name %q", name)
+	}
+
+	t, err := time.Parse(snapshotTimeLayout, match)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse timestamp %q from snapshot name %q: %w", match, name, err)
+	}
+
+	return t.Format(snapshotTimeLayout), nil
 }
