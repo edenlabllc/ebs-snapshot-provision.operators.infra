@@ -30,16 +30,36 @@ The **EBS Snapshot Provision Operator** addresses this gap by watching for AWS E
 automatically creating the corresponding `VolumeSnapshot` and `VolumeSnapshotContent` Kubernetes resources in the target
 cluster.
 
+### What about rotating live snapshots and cleaning up old ones?
+
+The **EBS Snapshot Rotation Operator** complements the provisioning flow above. While provisioning brings snapshots
+*from* another cluster, rotation creates fresh `VolumeSnapshot` resources directly from **live PersistentVolumeClaims**
+in the current cluster, and applies a retention policy to the resulting pool of snapshots — including any snapshots
+that were previously imported by the provision operator for the same namespace.
+
+This closes the loop: snapshots provisioned from an old cluster are not left to accumulate indefinitely (and keep
+costing money in AWS) — once fresh snapshots are rotated in, older ones beyond the configured retention count are
+purged automatically.
+
 ## Key features
 
 - Automatically detects and provisions EBS snapshots created in other clusters.
 - Supports custom tagging for identifying snapshots.
 - Periodically polls the AWS API to discover new snapshots.
 - Automatically creates the required Kubernetes resources (`VolumeSnapshot` and `VolumeSnapshotContent`).
+- Creates fresh `VolumeSnapshot` resources directly from live PersistentVolumeClaims, matched by namespace and label
+  selector.
+- Applies a configurable retention policy (`maxCount`) per rotation target, purging the oldest snapshots — including
+  ones previously imported by the provision operator — once the count is exceeded.
+- Supports both immediate and deferred snapshot purging (`purgePolicy: Immediate | Deferred`).
+- Each rotation target runs exactly once per configuration change — adding a new target to an existing resource only
+  runs the new one, without re-running targets that already completed.
 
 ## Custom Resource Specification
 
-The operator is configured via a Custom Resource (CR), which defines the snapshot import policy:
+### EBSSnapshotProvision example
+
+The `EBSSnapshotProvision` CR defines the snapshot import policy:
 
 ```yaml
 spec:
@@ -49,6 +69,30 @@ spec:
   frequency: 1m                                    # Polling frequency for AWS API (e.g., 1 minute)
   volumeSnapshotClassName: ebs-csi-snapshot-class  # Name of the VolumeSnapshotClass to use
 ```
+
+### EBSSnapshotRotation example
+
+```yaml
+spec:
+  # Optional: safety-net resync interval once all targets have completed (default: 60s)
+  frequency: 60s
+
+  # Each key is an independent rotation target, executed and tracked separately
+  snapshotRotations:
+    db-ebs-csi-snapshot:
+      namespace: db                  # Namespace to look up PVCs in
+      pvcSelector:                   # Optional: label selector for matching PVCs
+        matchLabels:
+          release: db-name
+      volumeSnapshotClassName: ebs-csi-snapshot-class
+      retention:
+        maxCount: 7                                  # Keep the newest 7 snapshots per PVC prefix
+        purgePolicy: Deferred                        # Deferred (default) or Immediate
+```
+
+Each target under `snapshotRotations` is a **one-shot** operation: on first reconcile it snapshots every matched PVC,
+applies retention, and marks itself `Completed` — it will not run again unless the target's configuration changes or
+the resource is deleted and recreated. Progress and outcome per target are reported under `status.targets.<key>`.
 
 ## Requirements
 
@@ -82,6 +126,7 @@ cluster `kubectl cluster-info` shows).
 
 ```sh
 kubectl apply -f config/samples/ebs_v1alpha1_ebssnapshotprovision.yaml
+kubectl apply -f config/samples/ebs_v1alpha1_ebssnapshotrotation.yaml
 ```
 
 2. Build and push your image to the location specified by `IMG`:

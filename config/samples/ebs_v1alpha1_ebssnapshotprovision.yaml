@@ -13,3 +13,4 @@ spec:
   region: us-east-1
   frequency: 1m
   volumeSnapshotClassName: ebs-csi-snapshot-class
+  waitForReadyToUse: true

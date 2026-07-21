@@ -2,13 +2,30 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  creationTimestamp: null
   name: manager-role
 rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - get
+  - list
+  - watch
 - apiGroups:
   - ebs.aws.edenlab.io
   resources:
   - ebssnapshotprovisions
+  - ebssnapshotrotations
   verbs:
   - create
   - delete
@@ -21,13 +38,28 @@ rules:
   - ebs.aws.edenlab.io
   resources:
   - ebssnapshotprovisions/finalizers
+  - ebssnapshotrotations/finalizers
   verbs:
   - update
 - apiGroups:
   - ebs.aws.edenlab.io
   resources:
   - ebssnapshotprovisions/status
+  - ebssnapshotrotations/status
   verbs:
   - get
   - patch
   - update
+- apiGroups:
+  - snapshot.storage.k8s.io
+  resources:
+  - volumesnapshotcontents
+  - volumesnapshots
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch

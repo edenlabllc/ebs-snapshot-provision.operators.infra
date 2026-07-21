@@ -1,0 +1,23 @@
+apiVersion: ebs.aws.edenlab.io/v1alpha1
+kind: EBSSnapshotRotation
+metadata:
+  labels:
+    app.kubernetes.io/name: ebssnapshotrotation
+    app.kubernetes.io/instance: ebssnapshotrotation-sample
+    app.kubernetes.io/part-of: ebs-snapshot-provision
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: ebs-snapshot-rotation
+  name: ebssnapshotrotation-sample
+  namespace: minio
+spec:
+  frequency: 1m
+  snapshotRotations:
+    db-ebs-csi-snapshot:
+      namespace: db
+      pvcSelector:
+        matchLabels:
+          release: db-name
+      volumeSnapshotClassName: ebs-csi-snapshot-class
+      retention:
+        maxCount: 1
+        purgePolicy: Deferred
