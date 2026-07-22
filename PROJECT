@@ -2,6 +2,7 @@
 # This file is used to track the info used to scaffold your project
 # and allow the plugins properly work.
 # More info: https://book.kubebuilder.io/reference/project-config.html
+cliVersion: 4.9.0
 domain: aws.edenlab.io
 layout:
 - go.kubebuilder.io/v4
@@ -15,6 +16,15 @@ resources:
   domain: aws.edenlab.io
   group: ebs
   kind: EBSSnapshotProvision
+  path: ebs-snapshot-provision.operators.infra/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: aws.edenlab.io
+  group: ebs
+  kind: EBSSnapshotRotation
   path: ebs-snapshot-provision.operators.infra/api/v1alpha1
   version: v1alpha1
 version: "3"
